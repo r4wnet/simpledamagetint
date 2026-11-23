@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "simpledamagetint",
+  "version": "${version}",
+  "name": "Simple Damage Tint",
+  "authors": ["rawnet"],
+  "description": "Customizes the color of the damage tint on entities and armor.",
+  "license": "MIT",
+  "icon": "assets/simpledamagetint/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "net.rawnet.simpledamagetint.SimpleDamageTint"
+    ],
+    "modmenu": [
+      "net.rawnet.simpledamagetint.ModMenuApiImpl"
+    ]
+  },
+  "mixins": [
+    "simpledamagetint.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader}",
+    "minecraft": "${minecraft}",
+    "java": ">=${java}"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}

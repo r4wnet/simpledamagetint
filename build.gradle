@@ -1,0 +1,105 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
+
+plugins {
+    id 'base'
+    id 'net.fabricmc.fabric-loom' version '1.17.21' apply false
+    id 'net.fabricmc.fabric-loom-remap' version '1.17.21' apply false
+}
+
+// Group only builds with identical runtime files. A source change that makes
+// two patch releases differ automatically gives them separate implementations.
+def releaseFiles = objects.fileCollection()
+def packaged = layout.buildDirectory.file('distribution/simpledamagetint-1.0.1+1.21-26.3.jar')
+def universal = tasks.register('universalJar') {
+    group = 'build'
+    inputs.files(releaseFiles)
+    outputs.file(packaged)
+    doLast {
+        def writeZip = { Map entries, OutputStream stream ->
+            new ZipOutputStream(stream).withCloseable { zip ->
+                entries.toSorted().each { path, bytes ->
+                    def entry = new ZipEntry(path)
+                    entry.time = 0
+                    zip.putNextEntry(entry)
+                    zip.write(bytes as byte[])
+                    zip.closeEntry()
+                }
+            }
+        }
+        def json = { value -> JsonOutput.prettyPrint(JsonOutput.toJson(value)).getBytes('UTF-8') }
+        def groups = [:]
+        def outer = [:]
+        def metadata
+        def versions = []
+        releaseFiles.files.sort { it.name }.each { file ->
+            new ZipFile(file).withCloseable { archive ->
+                def mod = new JsonSlurper().parse(archive.getInputStream(archive.getEntry('fabric.mod.json')))
+                metadata = mod
+                versions << mod.depends.minecraft
+                def classes = [:]
+                archive.entries().each { entry ->
+                    if (entry.directory || entry.name in ['fabric.mod.json', 'META-INF/MANIFEST.MF']) return
+                    def bytes = archive.getInputStream(entry).bytes
+                    if (entry.name.startsWith('assets/') || entry.name == 'LICENSE') {
+                        if (outer.containsKey(entry.name) && !Arrays.equals(outer[entry.name], bytes))
+                            throw new GradleException("Version-specific shared resource: ${entry.name}")
+                        outer[entry.name] = bytes
+                    } else {
+                        classes[entry.name] = bytes
+                    }
+                }
+                def fingerprint = classes.collectEntries { name, bytes ->
+                    [(name): MessageDigest.getInstance('SHA-256').digest(bytes).encodeHex().toString()]
+                }
+                def group = groups.computeIfAbsent(fingerprint) {
+                    [files: classes, versions: [], java: mod.depends.java,
+                     namespace: mod.depends.minecraft.startsWith('1.') ? 'intermediary' : 'official']
+                }
+                group.versions << mod.depends.minecraft
+            }
+        }
+        def nested = []
+        groups.values().eachWithIndex { group, index ->
+            def path = "META-INF/jars/renderer-${index + 1}.jar".toString()
+            group.files['fabric.mod.json'] = json([
+                schemaVersion: 1, id: 'simpledamagetint_renderer', version: "1.0.${index + 1}",
+                name: 'Simple Damage Tint Renderer', authors: metadata.authors, environment: 'client', license: 'MIT',
+                depends: [minecraft: group.versions, java: group.java],
+                custom: [modmenu: [badges: ['library'], parent: 'simpledamagetint']]
+            ])
+            group.files['META-INF/MANIFEST.MF'] = ("Manifest-Version: 1.0\r\nFabric-Mapping-Namespace: " +
+                    group.namespace + "\r\n\r\n").getBytes('UTF-8')
+            def buffer = new ByteArrayOutputStream()
+            writeZip(group.files, buffer)
+            outer[path] = buffer.toByteArray()
+            nested << [file: path]
+        }
+        metadata.version = '1.0.1+1.21-26.3'
+        metadata.depends.minecraft = versions
+        metadata.depends.java = '>=21'
+        metadata.depends.simpledamagetint_renderer = '*'
+        metadata.jars = nested
+        outer['fabric.mod.json'] = json(metadata)
+        def destination = packaged.get().asFile
+        destination.parentFile.mkdirs()
+        destination.withOutputStream { writeZip(outer, it) }
+    }
+}
+def jars = tasks.register('releaseJars', Sync) {
+    dependsOn universal
+    from packaged
+    into layout.buildDirectory.dir('libs')
+}
+tasks.named('assemble') { dependsOn jars }
+
+subprojects {
+    afterEvaluate {
+        releaseFiles.from(tasks.named(project.name.startsWith('mc-26.') ? 'jar' : 'remapJar'))
+    }
+}
+

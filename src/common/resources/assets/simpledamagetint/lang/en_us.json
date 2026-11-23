@@ -1,0 +1,16 @@
+{
+  "options.simpledamagetint": "Simple Damage Tint",
+
+  "options.simpledamagetint.colorpicker.red": "Red: %s",
+  "options.simpledamagetint.colorpicker.green": "Green: %s",
+  "options.simpledamagetint.colorpicker.blue": "Blue: %s",
+  "options.simpledamagetint.colorpicker.opacity": "Opacity: %s",
+
+  "options.simpledamagetint.damageColor": "Damage color on entities",
+
+  "options.simpledamagetint.showDamageTintOnArmor": "Damage tint on armor",
+  "options.simpledamagetint.showDamageTintOnArmor.none": "No",
+  "options.simpledamagetint.showDamageTintOnArmor.armor_only": "On armor",
+  "options.simpledamagetint.showDamageTintOnArmor.armor_and_trim": "On armor & trim",
+  "options.simpledamagetint.showDamageTintOnArmor.tooltip": "Makes the damage tint also appear on armor. Can also enable the tint on trims."
+}

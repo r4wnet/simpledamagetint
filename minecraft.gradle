@@ -1,0 +1,81 @@
+def minecraftVersion = project.name.substring(3)
+def modern = minecraftVersion.startsWith('26.')
+def patch = modern ? 0 : (minecraftVersion.tokenize('.').getAt(2) ?: '0').toInteger()
+def submittedArmor = modern || patch >= 9
+def modMenu121 = [
+    '11.0.5', '11.0.5', '12.0.1', '12.0.1', '13.0.4', '14.0.2',
+    '15.0.2', '15.0.2', '15.0.2', '16.0.1', '16.0.1', '17.0.0'
+]
+def modMenu26 = [
+    '26.1': '18.0.2', '26.1.1': '18.0.2', '26.1.2': '18.0.2',
+    '26.2': '20.0.3', '26.3': '21.0.0'
+]
+def modMenu = modern ? modMenu26[minecraftVersion] : modMenu121[patch]
+def javaVersion = modern ? 25 : 21
+def loaderVersion = '0.19.5'
+
+apply plugin: modern ? 'net.fabricmc.fabric-loom' : 'net.fabricmc.fabric-loom-remap'
+
+group = 'net.rawnet'
+version = "1.0.1+${minecraftVersion}"
+base.archivesName = 'simpledamagetint'
+
+repositories {
+    maven { url = 'https://maven.terraformersmc.com/releases/' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    if (!modern) {
+        mappings loom.officialMojangMappings()
+    }
+    def modScope = modern ? 'implementation' : 'modImplementation'
+    add(modScope, "net.fabricmc:fabric-loader:${loaderVersion}")
+    add(modern ? 'compileOnly' : 'modCompileOnly', "com.terraformersmc:modmenu:${modMenu}") {
+        transitive = false
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = javaVersion
+}
+
+def sourceProfiles = ['common', modern ? 'gui-extract' : 'gui-render',
+    modern || patch >= 11 ? 'gui-show' : 'gui-set',
+    patch < 2 && !modern ? 'overlay-abgr' : 'overlay-argb',
+    submittedArmor ? 'armor-submit' : patch >= 2 ? 'armor-state' : 'armor-entity']
+if (modern || patch >= 5) {
+    sourceProfiles += minecraftVersion == '26.3' ? 'armor-renderpearl' : 'armor-pipeline'
+}
+
+if (submittedArmor) {
+    sourceProfiles += minecraftVersion == '26.3' ? 'armor-26.3-equipment' : 'armor-submit-equipment'
+}
+
+sourceSets.main {
+    java.setSrcDirs(sourceProfiles.collect { rootProject.file("src/${it}/java") })
+    resources.setSrcDirs([rootProject.file('src/common/resources')])
+}
+
+tasks.processResources {
+    def mixins = sourceSets.main.allJava.files.findAll { it.parentFile.name == 'client' }
+        .collect { '"client.' + it.name.replace('.java', '') + '"' }.sort().join(',\n    ')
+    def metadata = [version: project.version, minecraft: minecraftVersion, java: javaVersion,
+        loader: loaderVersion, client_mixins: mixins]
+    inputs.properties(metadata)
+    filesMatching(['fabric.mod.json', 'simpledamagetint.mixins.json']) { expand(metadata) }
+}
+
+tasks.named('jar') {
+    from(rootProject.file('LICENSE'))
+}
+
+
+

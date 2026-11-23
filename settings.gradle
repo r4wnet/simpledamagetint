@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'simpledamagetint'
+
+def versions = ['1.21', '1.21.1'] + (2..11).collect { "1.21.${it}" } +
+    ['26.1', '26.1.1', '26.1.2', '26.2', '26.3']
+versions.each { version ->
+    include("mc-${version}")
+    project(":mc-${version}").projectDir = file("versions/${version}")
+    project(":mc-${version}").buildFileName = '../../minecraft.gradle'
+}
