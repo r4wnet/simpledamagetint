@@ -17,7 +17,7 @@ def loaderVersion = '0.19.5'
 apply plugin: modern ? 'net.fabricmc.fabric-loom' : 'net.fabricmc.fabric-loom-remap'
 
 group = 'net.rawnet'
-version = "1.1.0+${minecraftVersion}"
+version = "1.1.1+${minecraftVersion}"
 base.archivesName = 'simpledamagetint'
 
 repositories {
@@ -52,7 +52,11 @@ def sourceProfiles = ['common', modern ? 'gui-extract' : 'gui-render',
     patch < 2 && !modern ? 'overlay-abgr' : 'overlay-argb',
     submittedArmor ? 'armor-submit' : patch >= 2 ? 'armor-state' : 'armor-entity']
 if (modern || patch >= 5) {
-    sourceProfiles += minecraftVersion == '26.3' ? 'armor-renderpearl' : 'armor-pipeline'
+    if (minecraftVersion == '26.3') {
+        sourceProfiles += 'armor-renderpearl'
+    } else {
+        sourceProfiles += ['armor-pipeline', minecraftVersion == '26.2' ? 'overlay-binding' : 'overlay-sampler']
+    }
 }
 
 if (submittedArmor) {

@@ -14,7 +14,7 @@ plugins {
 // Group only builds with identical runtime files. A source change that makes
 // two patch releases differ automatically gives them separate implementations.
 def releaseFiles = objects.fileCollection()
-def packaged = layout.buildDirectory.file('distribution/simpledamagetint-1.1.0+1.21-26.3.jar')
+def packaged = layout.buildDirectory.file('distribution/simpledamagetint-1.1.1+1.21-26.3.jar')
 def universal = tasks.register('universalJar') {
     group = 'build'
     inputs.files(releaseFiles)
@@ -79,7 +79,7 @@ def universal = tasks.register('universalJar') {
             outer[path] = buffer.toByteArray()
             nested << [file: path]
         }
-        metadata.version = '1.1.0+1.21-26.3'
+        metadata.version = '1.1.1+1.21-26.3'
         metadata.depends.minecraft = versions
         metadata.depends.java = '>=21'
         metadata.depends.simpledamagetint_renderer = '*'

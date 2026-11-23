@@ -31,15 +31,19 @@ public class ModConfig {
 
     public static ModConfig load(Path file, Logger logger) {
         ModConfig config = new ModConfig();
-        if (Files.exists(file)) {
+        boolean newFile = Files.notExists(file);
+        if (!newFile) {
             try (BufferedReader reader = Files.newBufferedReader(file)) {
                 ModConfig read = GSON.fromJson(reader, ModConfig.class);
-                if (read != null) {
-                    config = read;
+                if (read == null) {
+                    logger.warn("Empty SimpleDamageTint config at {}. Using session defaults.", file);
+                    return config;
                 }
+                config = read;
             }
             catch (IOException | RuntimeException e) {
-                logger.error("Failed to read SimpleDamageTint config, falling back to defaults", e);
+                logger.error("Could not read {}. Using session defaults.", file, e);
+                return config;
             }
         }
         if (config.damageTintOnArmor == null) {
@@ -47,11 +51,17 @@ public class ModConfig {
         }
         config.file = file;
         config.logger = logger;
-        config.save();
+        if (newFile) {
+            config.save();
+        }
         return config;
     }
 
     public void save() {
+        // A failed load leaves the path unset to protect the original file on screen close.
+        if (file == null) {
+            return;
+        }
         try {
             Files.createDirectories(this.file.getParent());
             try (BufferedWriter writer = Files.newBufferedWriter(this.file)) {

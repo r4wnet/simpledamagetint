@@ -17,7 +17,7 @@ dependencies.
 ```
 
 The build produces one JAR for all 17 Minecraft Java Edition releases from
-**1.21 through 26.3**. Copy `build/libs/simpledamagetint-1.1.0+1.21-26.3.jar`
+**1.21 through 26.3**. Copy `build/libs/simpledamagetint-1.1.1+1.21-26.3.jar`
 to your `mods` folder, replacing any previous Simple Damage Tint JAR.
 
 Fabric Loader selects the matching renderer at startup. Minecraft versions that

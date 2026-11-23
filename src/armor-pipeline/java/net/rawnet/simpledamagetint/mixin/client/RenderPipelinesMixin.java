@@ -3,6 +3,7 @@ package net.rawnet.simpledamagetint.mixin.client;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import dev.rawnet.simpledamagetint.render.ArmorOverlaySampler;
 import net.minecraft.client.renderer.RenderPipelines;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -33,6 +34,6 @@ abstract class RenderPipelinesMixin {
     @Unique
     private static RenderPipeline.Builder withoutNoOverlay(RenderPipeline.Builder builder, String flag,
             Operation<RenderPipeline.Builder> original) {
-        return "NO_OVERLAY".equals(flag) ? builder : original.call(builder, flag);
+        return "NO_OVERLAY".equals(flag) ? ArmorOverlaySampler.bind(builder) : original.call(builder, flag);
     }
 }
