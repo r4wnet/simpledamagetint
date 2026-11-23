@@ -31,6 +31,8 @@ public class ConfigScreen extends ConfigScreenBase {
     private final ModConfig config;
     private EditBox hexField;
     private Button armorButton;
+    private Button
+            rainbowButton;
     private final ColorSlider[] sliders = new ColorSlider[ColorChannel.values().length];
     private boolean syncing;
     private int panelLeft;
@@ -81,9 +83,13 @@ public class ConfigScreen extends ConfigScreenBase {
         }
         this.armorButton = Button.builder(this.armorButtonLabel(), button -> this.setArmorTint(ConfigScreen.next(this.config.damageTintOnArmor))).bounds(this.panelLeft, slidersTop + 48 + 8, PANEL_WIDTH, ROW_HEIGHT).tooltip(Tooltip.create(Component.translatable("options.simpledamagetint.showDamageTintOnArmor.tooltip"))).build();
         this.addRenderableWidget(this.armorButton);
+        this.rainbowButton = Button.builder(rainbowLabel(), button -> setRainbow(!config.rainbowTint))
+                .bounds(panelLeft, slidersTop + 80, PANEL_WIDTH, ROW_HEIGHT).build();
+        this.addRenderableWidget(rainbowButton);
         int buttonWidth = sliderWidth;
-        int buttonsTop = slidersTop + 72 + 20;
+        int buttonsTop = slidersTop + 104;
         this.addRenderableWidget(Button.builder(Component.translatable("controls.reset"), button -> {
+            setRainbow(false);
             this.setColor(ModConfig.DEFAULT_DAMAGE_COLOR);
             this.setArmorTint(ModConfig.DEFAULT_DAMAGE_TINT_ON_ARMOR);
         }).bounds(this.panelLeft, buttonsTop, buttonWidth, ROW_HEIGHT).build());
@@ -113,7 +119,7 @@ public class ConfigScreen extends ConfigScreenBase {
                 graphics.fill(x + cx, y + cy, Math.min(x + cx + 5, x + width), Math.min(y + cy + 5, y + height), light ? CHECKER_LIGHT : CHECKER_DARK);
             }
         }
-        graphics.fill(x, y, x + width, y + height, this.config.damageColor);
+        graphics.fill(x, y, x + width, y + height, this.config.currentTintColor());
         graphics.fill(x - 1, y - 1, x + width + 1, y, BORDER);
         graphics.fill(x - 1, y + height, x + width + 1, y + height + 1, BORDER);
         graphics.fill(x - 1, y, x, y + height, BORDER);
@@ -171,6 +177,17 @@ public class ConfigScreen extends ConfigScreenBase {
         }
         this.syncing = false;
         this.syncHexField();
+    }
+
+    private Component rainbowLabel() {
+        return Component.translatable(KEY + ".rainbow", config.rainbowTint
+                ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+    }
+
+    private void setRainbow(boolean enabled) {
+        config.rainbowTint = enabled;
+        rainbowButton.setMessage(rainbowLabel());
+        OverlayReloadListener.callEvent();
     }
 
     private Component armorButtonLabel() {

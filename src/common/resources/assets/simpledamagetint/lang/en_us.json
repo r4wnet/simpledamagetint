@@ -6,6 +6,7 @@
   "options.simpledamagetint.colorpicker.blue": "Blue: %s",
   "options.simpledamagetint.colorpicker.opacity": "Opacity: %s",
 
+  "options.simpledamagetint.rainbow": "Rainbow tint: %s",
   "options.simpledamagetint.damageColor": "Damage color on entities",
 
   "options.simpledamagetint.showDamageTintOnArmor": "Damage tint on armor",

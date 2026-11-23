@@ -13,10 +13,21 @@ public class ModConfig {
     public static final int DEFAULT_DAMAGE_COLOR = 0x4DFF0000;
     public static final ArmorDamageRenderSelection DEFAULT_DAMAGE_TINT_ON_ARMOR = ArmorDamageRenderSelection.NONE;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public boolean rainbowTint;
     public int damageColor = DEFAULT_DAMAGE_COLOR;
     public ArmorDamageRenderSelection damageTintOnArmor = DEFAULT_DAMAGE_TINT_ON_ARMOR;
     private transient Path file;
     private transient Logger logger;
+
+    public int currentTintColor() {
+        if (!rainbowTint) {
+            return damageColor;
+        }
+        // One hue cycle in 3.6 seconds, with opacity taken from the user's color.
+        float hue = Math.floorMod(System.nanoTime(), 3_600_000_000L) / 3_600_000_000f;
+        int rgb = java.awt.Color.HSBtoRGB(hue, 1.0f, 1.0f);
+        return (damageColor & 0xFF000000) | (rgb & 0x00FFFFFF);
+    }
 
     public static ModConfig load(Path file, Logger logger) {
         ModConfig config = new ModConfig();

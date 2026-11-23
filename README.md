@@ -3,7 +3,8 @@
 Simple Damage Tint is a client-side Fabric mod that lets you change the color
 and opacity of the flash that appears when an entity takes damage. You can also
 apply the tint to armor and armor trims. Open the settings through Mod Menu or
-edit `config/simpledamagetint.json` directly.
+edit `config/simpledamagetint.json` directly. Enable **Rainbow tint** for a cycling
+hue that uses your chosen opacity. Turn it off to return to your saved color.
 
 ## Build and install
 
@@ -16,7 +17,7 @@ dependencies.
 ```
 
 The build produces one JAR for all 17 Minecraft Java Edition releases from
-**1.21 through 26.3**. Copy `build/libs/simpledamagetint-1.0.1+1.21-26.3.jar`
+**1.21 through 26.3**. Copy `build/libs/simpledamagetint-1.1.0+1.21-26.3.jar`
 to your `mods` folder, replacing any previous Simple Damage Tint JAR.
 
 Fabric Loader selects the matching renderer at startup. Minecraft versions that

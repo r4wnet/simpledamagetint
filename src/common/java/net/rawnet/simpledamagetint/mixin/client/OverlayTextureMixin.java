@@ -35,7 +35,7 @@ abstract class OverlayTextureMixin implements OverlayReloadListener {
             return;
         }
 
-        int color = SimpleDamageTint.getConfig().damageColor;
+        int color = SimpleDamageTint.getConfig().currentTintColor();
         int pixel = ((255 - (color >>> 24)) << 24) | (color & 0xFFFFFF);
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 16; x++) {
