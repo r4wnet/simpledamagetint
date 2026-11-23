@@ -1,38 +1,40 @@
 # Simple Damage Tint
 
-Clientseitige Fabric-Mod für die Farbe und Deckkraft des Treffer-Overlays auf
-Entitäten, Rüstung und Rüstungsverzierungen. Die Einstellungen sind optional
-über Mod Menu erreichbar und liegen in `config/simpledamagetint.json`.
+Simple Damage Tint is a client-side Fabric mod that lets you change the color
+and opacity of the flash that appears when an entity takes damage. You can also
+apply the tint to armor and armor trims. Open the settings through Mod Menu or
+edit `config/simpledamagetint.json` directly.
 
-## Bauen
+## Build and install
 
-Für den Build wird ein **JDK 25** benötigt. Die Gradle-Version liefert der
-Wrapper. Der erste Build lädt Minecraft und die Build-Abhängigkeiten herunter.
+Install **JDK 25** to build the mod. The Gradle wrapper downloads the required
+Gradle version. The first build also downloads Minecraft and the build
+dependencies.
 
 ```powershell
 .\gradlew.bat build
 ```
 
-Das erzeugt eine installierbare Datei für alle 17 Java-Releases von **1.21 bis
-26.3**: `build/libs/simpledamagetint-1.0.1+1.21-26.3.jar`. Ersetze die bisherige
-Simple-Damage-Tint-JAR im Ordner `mods` durch diese Datei. Fabric Loader wählt
-beim Start den passenden eingebetteten Renderer. Builds mit identischem Code
-teilen sich denselben Renderer. Minecraft 1.21.x benötigt Java 21 und Minecraft
-26.x Java 25. Der Build verwendet Fabric Loader 0.19.5.
+The build produces one JAR for all 17 Minecraft Java Edition releases from
+**1.21 through 26.3**. Copy `build/libs/simpledamagetint-1.0.1+1.21-26.3.jar`
+to your `mods` folder, replacing any previous Simple Damage Tint JAR.
 
-Einzelne Version bauen, hier am Beispiel von 26.2
+Fabric Loader selects the matching renderer at startup. Minecraft versions that
+use identical renderer code share the same bundled renderer. The build uses
+Fabric Loader 0.19.5. To play, use Java 21 for Minecraft 1.21.x and Java 25 for
+Minecraft 26.x.
+
+To build for a single Minecraft version, use its Gradle task. For example, this
+command builds the 26.2 JAR in `versions/26.2/build/libs/`.
 
 ```powershell
 .\gradlew.bat :mc-26.2:build
 ```
 
-Das zugehörige JAR liegt in `versions/26.2/build/libs/`. Unter Linux und
-macOS wird der Wrapper mit `./gradlew` aufgerufen.
+On Linux and macOS, use `./gradlew` in place of `.\gradlew.bat`.
 
-## Quellcode
+## Source code
 
-`src/common` enthält die Konfiguration, die Benutzeroberfläche, gemeinsame
-Rendering-Logik und Ressourcen. `minecraft.gradle` wählt zusätzlich die
-passenden Quellordner für die GUI, das Overlay-Pixelformat und die
-Minecraft-Rendering-API aus.
-
+`src/common` contains the settings, user interface, shared rendering code, and
+assets. For each Minecraft version, `minecraft.gradle` selects the additional
+source directories for the GUI, overlay pixel format, and rendering API.
